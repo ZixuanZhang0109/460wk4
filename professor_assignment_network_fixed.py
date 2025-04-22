@@ -81,41 +81,36 @@ pos = {
     "τ":  (4, 0),
 }
 
-# ------------------------------------------------------------------
-# 4. Draw the network
-# ------------------------------------------------------------------
+# --------------------------------------------------------------
+# 4.  Draw the network  (replace everything from “# Edge labels”)
+# --------------------------------------------------------------
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.set_title("Minimum‑Cost Network Flow Representation", pad=15)
 
-# Nodes
 nx.draw_networkx_nodes(G, pos, node_color="#D4E6F1",
                        node_size=1400, edgecolors="k", ax=ax)
 nx.draw_networkx_labels(G, pos, font_size=11, font_weight="bold", ax=ax)
-
-# Directed edges
 nx.draw_networkx_edges(G, pos, arrows=True, arrowstyle="->", ax=ax)
 
-# Edge labels (show utilities; offset every other label to avoid overlap)
-edge_labels = {}
-for (u, v, data) in G.edges(data=True):
-    text = data.get("label", "")
-    # Only display the satisfaction values; hide capacity text to keep the figure clean
-    edge_labels[(u, v)] = text if text.isdigit() else ""
+# only numeric satisfaction values
+edge_labels = {
+    (u, v): data["label"]
+    for u, v, data in G.edges(data=True)
+    if data["label"].isdigit()
+}
 
-# Slight manual displacement for readability
-label_pos = {}
-for i, (u, v) in enumerate(edge_labels.keys()):
-    x_mid = (pos[u][0] + pos[v][0]) / 2
-    y_mid = (pos[u][1] + pos[v][1]) / 2
-    offset = 0.1 if i % 2 == 0 else -0.1
-    label_pos[(u, v)] = (x_mid + offset, y_mid + offset)
-
-nx.draw_networkx_edge_labels(G, label_pos, edge_labels=edge_labels,
-                             font_color="firebrick", font_size=9, ax=ax)
+nx.draw_networkx_edge_labels(
+    G,
+    pos,                     # ← correct argument
+    edge_labels=edge_labels,
+    font_color="firebrick",
+    font_size=9,
+    ax=ax,
+    label_pos=0.55           # slight shift along each edge
+)
 
 ax.set_axis_off()
 st.pyplot(fig)
-
 # ------------------------------------------------------------------
 # 5. Sidebar description
 # ------------------------------------------------------------------
